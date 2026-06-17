@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Result - WebGuard Lite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 50px;
+            max-width: 600px;
+            width: 100%;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .result-card {
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .result-card.secure {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            border: 2px solid #6dd98a;
+        }
+
+        .result-card.not-secure {
+            background: linear-gradient(135deg, #fa8072 0%, #ff6b6b 100%);
+            border: 2px solid #ff5252;
+        }
+
+        .result-card.error {
+            background: linear-gradient(135deg, #ffd89b 0%, #ffa751 100%);
+            border: 2px solid #ffb347;
+        }
+
+        .status-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+
+        .status-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-message {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .url-display {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            word-break: break-all;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .details-section {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #666;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.secure {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge.not-secure {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge.error {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .recommendation {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+        }
+
+        .recommendation h3 {
+            color: #1565c0;
+            font-size: 14px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .recommendation p {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .security-tips {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+        }
+
+        .security-tips h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tip-list {
+            list-style: none;
+        }
+
+        .tip-list li {
+            padding: 8px 0;
+            color: #666;
+            font-size: 14px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .tip-list li:before {
+            content: "•";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #e8e8e8;
+            border-color: #d0d0d0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .result-card {
+                padding: 25px 15px;
+            }
+
+            .status-icon {
+                font-size: 48px;
+            }
+
+            .status-text {
+                font-size: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🛡️</div>
+            <h1>WebGuard Lite</h1>
+            <p class="subtitle">Scan Result</p>
+        </div>
+
+        <!-- Result Card -->
+        <div th:if="${status == 'SECURE'}" class="result-card secure">
+            <div class="status-icon">🔒</div>
+            <div class="status-text">SECURE</div>
+            <div class="status-message" th:text="${message}"></div>
+            <div class="url-display" th:text="${url}"></div>
+        </div>
+
+        <div th:if="${status == 'NOT SECURE'}" class="result-card not-secure">
+            <div class="status-icon">⚠️</div>
+            <div class="status-text">NOT SECURE</div>
+            <div class="status-message" th:text="${message}"></div>
+            <div class="url-display" th:text="${url}"></div>
+        </div>
+
+        <div th:if="${status == 'ERROR'}" class="result-card error">
+            <div class="status-icon">❌</div>
+            <div class="status-text">ERROR</div>
+            <div class="status-message" th:text="${message}"></div>
+            <div class="url-display" th:text="${url}"></div>
+        </div>
+
+        <!-- Details Section -->
+        <div class="details-section">
+            <div class="detail-item">
+                <span class="detail-label">Website URL:</span>
+                <span class="detail-value" th:text="${url}"></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Protocol:</span>
+                <span class="detail-value" th:text="${#strings.substring(url, 0, url.indexOf('://'))}"></span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">HTTPS Status:</span>
+                <span class="detail-value">
+                    <span th:if="${isHttps}" class="badge secure">✓ Active</span>
+                    <span th:unless="${isHttps}" class="badge not-secure">✗ Inactive</span>
+                </span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">Scan Time:</span>
+                <span class="detail-value" th:text="${#dates.format(#dates.createNow(), 'hh:mm:ss a')}"></span>
+            </div>
+        </div>
+
+        <!-- Recommendation -->
+        <div th:if="${isHttps}" class="recommendation">
+            <h3>✓ Good Job!</h3>
+            <p>This website is using HTTPS encryption. Your connection is protected. Always verify the padlock icon in your browser's address bar before entering sensitive information.</p>
+        </div>
+
+        <div th:unless="${isHttps}" class="recommendation">
+            <h3>⚠️ Recommendation</h3>
+            <p>This website is not using HTTPS. Avoid entering sensitive information like passwords or credit card details. Consider using a VPN for additional protection on unsecured sites.</p>
+        </div>
+
+        <!-- Security Tips -->
+        <div class="security-tips">
+            <h3>🔐 Security Tips</h3>
+            <ul class="tip-list">
+                <li>Always look for the padlock icon in your browser</li>
+                <li>Check the address bar shows "https://" not "http://"</li>
+                <li>Never enter passwords on non-HTTPS sites</li>
+                <li>Be cautious with financial transactions</li>
+                <li>Use strong, unique passwords for each site</li>
+            </ul>
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-group">
+            <a href="/" class="btn btn-primary">Scan Another Website</a>
+            <a href="/" class="btn btn-secondary">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>
